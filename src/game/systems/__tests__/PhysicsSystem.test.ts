@@ -26,31 +26,44 @@ describe('PhysicsSystem', () => {
 
   describe('checkCatch', () => {
     it('catches pancake directly above plate', () => {
-      const plate = createTestPlate();
+      const state = createTestState();
       const pancake = createTestPancake({ x: 400, y: 540 });
-      const landingSurface = plate.y - plate.height / 2;
-      expect(physics.checkCatch(pancake, plate, landingSurface)).toBe(true);
+      const landingSurface = state.plate.y - state.plate.height / 2;
+      expect(physics.checkCatch(pancake, state, landingSurface)).toBe(true);
     });
 
     it('misses pancake far to the left of plate', () => {
-      const plate = createTestPlate();
+      const state = createTestState();
       const pancake = createTestPancake({ x: 100, y: 540 });
-      const landingSurface = plate.y - plate.height / 2;
-      expect(physics.checkCatch(pancake, plate, landingSurface)).toBe(false);
+      const landingSurface = state.plate.y - state.plate.height / 2;
+      expect(physics.checkCatch(pancake, state, landingSurface)).toBe(false);
     });
 
     it('misses pancake still above the landing surface', () => {
-      const plate = createTestPlate();
+      const state = createTestState();
       const pancake = createTestPancake({ x: 400, y: 400 });
-      const landingSurface = plate.y - plate.height / 2;
-      expect(physics.checkCatch(pancake, plate, landingSurface)).toBe(false);
+      const landingSurface = state.plate.y - state.plate.height / 2;
+      expect(physics.checkCatch(pancake, state, landingSurface)).toBe(false);
     });
 
     it('catches pancake overlapping edge of plate', () => {
-      const plate = createTestPlate({ x: 400, width: 130 });
+      const state = createTestState();
       const pancake = createTestPancake({ x: 450, y: 540, width: 90 });
-      const landingSurface = plate.y - plate.height / 2;
-      expect(physics.checkCatch(pancake, plate, landingSurface)).toBe(true);
+      const landingSurface = state.plate.y - state.plate.height / 2;
+      expect(physics.checkCatch(pancake, state, landingSurface)).toBe(true);
+    });
+
+    it('misses pancake hitting the side of the stack instead of the top', () => {
+      const plate = createTestPlate({ x: 400, width: 130 });
+      const topOfStack = createTestPancake({ x: 400, y: 520, width: 90 });
+      const state = createTestState({
+        plate,
+        stackedPancakes: [topOfStack],
+      });
+      const landingSurface = physics.getLandingSurface(state);
+      // Pancake at x=500: overlaps plate (455 < 465) but NOT the top pancake (455 > 445)
+      const pancake = createTestPancake({ x: 500, y: landingSurface, width: 90 });
+      expect(physics.checkCatch(pancake, state, landingSurface)).toBe(false);
     });
   });
 
