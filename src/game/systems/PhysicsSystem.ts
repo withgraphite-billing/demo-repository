@@ -58,7 +58,13 @@ export class PhysicsSystem {
 
   checkCatch(pancake: PancakeState, state: GameState, landingSurface: number): boolean {
     const pancakeBottom = pancake.y + pancake.height / 2;
+    
+    if (pancakeBottom < landingSurface) {
+      return false;
+    }
 
+    // When there's a stack, check horizontal overlap with the top pancake
+    // Otherwise, check with the plate
     const surface = state.stackedPancakes.length > 0
       ? state.stackedPancakes[state.stackedPancakes.length - 1]
       : state.plate;
@@ -67,7 +73,7 @@ export class PhysicsSystem {
       pancake.x + pancake.width / 2 > surface.x - surface.width / 2 &&
       pancake.x - pancake.width / 2 < surface.x + surface.width / 2;
 
-    return horizontalOverlap && pancakeBottom >= landingSurface;
+    return horizontalOverlap;
   }
 
   private catchPancake(pancake: PancakeState, state: GameState, landingSurface: number): void {
