@@ -30,6 +30,7 @@ export class GameEngine {
       stackedPancakes: [],
       score: 0,
       status: 'idle',
+      cameraY: 0,
     };
   }
 

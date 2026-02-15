@@ -17,6 +17,7 @@ function createTestState(overrides?: Partial<GameState>): GameState {
     stackedPancakes: [],
     score: 0,
     status: 'playing',
+    cameraY: 0,
     ...overrides,
   };
 }
@@ -64,6 +65,31 @@ describe('PhysicsSystem', () => {
       // Pancake at x=500: overlaps plate (455 < 465) but NOT the top pancake (455 > 445)
       const pancake = createTestPancake({ x: 500, y: landingSurface, width: 90 });
       expect(physics.checkCatch(pancake, state, landingSurface)).toBe(false);
+    });
+  });
+
+  describe('updateCamera', () => {
+    it('does not scroll when stack is short', () => {
+      const state = createTestState({ cameraY: 0 });
+      state.stackedPancakes = [createTestPancake({ y: 530 })];
+      physics.updateCamera(state, 0.016);
+      expect(state.cameraY).toBe(0);
+    });
+
+    it('scrolls up when stack grows above comfort zone', () => {
+      const state = createTestState({ cameraY: 0 });
+      state.stackedPancakes = [
+        createTestPancake({ y: 530 }),
+        createTestPancake({ y: 100 }),
+      ];
+      physics.updateCamera(state, 1.0);
+      expect(state.cameraY).toBeLessThan(0);
+    });
+
+    it('never scrolls back down', () => {
+      const state = createTestState({ cameraY: -100 });
+      physics.updateCamera(state, 1.0);
+      expect(state.cameraY).toBe(-100);
     });
   });
 

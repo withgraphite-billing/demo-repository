@@ -12,7 +12,7 @@ export class SpawnSystem {
     this.timer += dt;
     if (this.timer >= SPAWN_INTERVAL) {
       this.timer -= SPAWN_INTERVAL;
-      state.fallingPancakes.push(createPancake());
+      state.fallingPancakes.push(createPancake(state.cameraY));
     }
   }
 }

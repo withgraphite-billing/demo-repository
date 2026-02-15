@@ -5,6 +5,8 @@ import {
   PLATE_SPEED,
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
+  CAMERA_LERP_SPEED,
+  CAMERA_COMFORT_ZONE,
 } from '../types';
 import { InputSystem } from './InputSystem';
 
@@ -13,6 +15,7 @@ export class PhysicsSystem {
     this.movePlate(state, dt, input);
     this.updateStackPositions(state);
     this.updateFallingPancakes(state, dt);
+    this.updateCamera(state, dt);
   }
 
   private movePlate(state: GameState, dt: number, input: InputSystem): void {
@@ -42,7 +45,7 @@ export class PhysicsSystem {
         continue;
       }
 
-      if (pancake.y > CANVAS_HEIGHT + 50) {
+      if (pancake.y > state.cameraY + CANVAS_HEIGHT + 50) {
         state.fallingPancakes.splice(i, 1);
       }
     }
@@ -74,6 +77,25 @@ export class PhysicsSystem {
       pancake.x - pancake.width / 2 < surface.x + surface.width / 2;
 
     return horizontalOverlap;
+  }
+
+  updateCamera(state: GameState, dt: number): void {
+    if (state.stackedPancakes.length === 0) return;
+
+    const topPancake = state.stackedPancakes[state.stackedPancakes.length - 1];
+    const stackTopY = topPancake.y - topPancake.height / 2;
+
+    const desiredScreenY = CANVAS_HEIGHT * CAMERA_COMFORT_ZONE;
+    const targetCameraY = stackTopY - desiredScreenY;
+
+    // Only scroll up (cameraY decreases), never back down
+    if (targetCameraY >= state.cameraY) return;
+
+    state.cameraY += (targetCameraY - state.cameraY) * CAMERA_LERP_SPEED * dt;
+
+    if (Math.abs(targetCameraY - state.cameraY) < 0.5) {
+      state.cameraY = targetCameraY;
+    }
   }
 
   private catchPancake(pancake: PancakeState, state: GameState, landingSurface: number): void {

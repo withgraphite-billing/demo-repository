@@ -11,6 +11,10 @@ export class Renderer {
 
   render(state: GameState): void {
     this.drawBackground();
+
+    this.ctx.save();
+    this.ctx.translate(0, -state.cameraY);
+
     this.drawPlate(state.plate);
     for (const pancake of state.stackedPancakes) {
       this.drawPancake(pancake);
@@ -18,6 +22,8 @@ export class Renderer {
     for (const pancake of state.fallingPancakes) {
       this.drawPancake(pancake);
     }
+
+    this.ctx.restore();
   }
 
   private drawBackground(): void {
